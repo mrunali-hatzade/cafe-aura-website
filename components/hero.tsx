@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
@@ -7,9 +9,10 @@ export function Hero() {
     <section id="home" className="relative min-h-screen flex items-center justify-center pt-16">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-center bg-no-repeat"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop')`,
+          backgroundSize: '100% 100%',
         }}
       />
       
@@ -43,6 +46,8 @@ export function Hero() {
             </Button>
           </Link>
         </div>
+
+
       </div>
 
       {/* Scroll Indicator */}
@@ -54,3 +59,6 @@ export function Hero() {
     </section>
   )
 }
+
+
+

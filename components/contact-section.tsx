@@ -44,8 +44,8 @@ export function ContactSection() {
               <div>
                 <h3 className="font-semibold text-foreground mb-1">Location</h3>
                 <p className="text-muted-foreground">
-                  123 Coffee Street<br />
-                  Downtown, CA 90210
+                  FC Road<br />
+                  Pune, Maharashtra 411004
                 </p>
               </div>
             </div>
@@ -56,7 +56,7 @@ export function ContactSection() {
               </div>
               <div>
                 <h3 className="font-semibold text-foreground mb-1">Phone</h3>
-                <p className="text-muted-foreground">(555) 123-4567</p>
+                <p className="text-muted-foreground">(+91) 9876543210</p>
               </div>
             </div>
 
@@ -83,13 +83,32 @@ export function ContactSection() {
               </div>
             </div>
 
-            {/* Map placeholder */}
-            <div className="aspect-video rounded-lg overflow-hidden mt-8">
-              <img
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop"
-                alt="Map location"
-                className="w-full h-full object-cover"
-              />
+             {/* Map placeholder */}
+            <div className="space-y-4 mt-8">
+              <div className="aspect-video rounded-lg overflow-hidden border border-border">
+                <iframe
+                  title="Cafe location map"
+                  src="https://maps.google.com/maps?q=FC%20Road%2C%20Pune%2C%20Maharashtra%20411004&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                  className="w-full h-full border-0"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p className="text-muted-foreground text-sm">
+                  Tap the map to view directions, or open it in Google Maps for navigation.
+                </p>
+                <Button asChild variant="secondary" className="w-full sm:w-auto">
+                  <a
+                    href="https://www.google.com/maps/dir/?api=1&destination=FC%20Road%2C%20Pune%2C%20Maharashtra%20411004"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open in Google Maps
+                  </a>
+                </Button>
+              </div>
             </div>
           </div>
 
