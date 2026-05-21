@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Reservation {
+  id              String   @id @default(cuid())
+  name            String
+  email           String
+  phone           String
+  date            DateTime
+  time            String
+  guests          Int
+  specialRequests String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isSeen          Boolean  @default(false)
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+  isSeen    Boolean  @default(false)
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  customerName   String
+  customerEmail  String
+  phone          String
+  deliveryType   String      // Dine-in, Takeaway, Delivery
+  address        String?     // Table number or delivery address
+  paymentMethod  String      // UPI, Card, COD
+  paymentStatus  String      // Paid, Pending
+  orderStatus    String      // Preparing, Completed, Cancelled
+  totalAmount    Float
+  items          OrderItem[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  isSeen         Boolean     @default(false)
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemName  String
+  quantity  Int
+  price     Float
+}

@@ -1,108 +1,82 @@
+"use client"
+
 import Link from "next/link"
-import { Instagram, Facebook, Twitter } from "lucide-react"
+import { motion } from "framer-motion"
+import { Facebook, Instagram, Twitter } from "lucide-react"
+import { fadeUp, staggerContainer } from "@/lib/motion"
+import { CAFE_NAME } from "@/lib/config"
 
 export function Footer() {
   return (
-    <footer className="bg-foreground text-background py-16">
+    <motion.footer
+      variants={staggerContainer}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      className="bg-foreground py-16 text-background"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
-          {/* Brand */}
+        <motion.div variants={fadeUp} className="grid grid-cols-1 gap-12 md:grid-cols-4 md:gap-8">
           <div className="md:col-span-2">
-            <Link href="/" className="inline-block mb-4">
-              <span className="font-serif text-3xl font-bold">Demo Café</span>
+            <Link href="/" className="mb-4 inline-block">
+              <span className="font-serif text-3xl font-bold">{CAFE_NAME}</span>
             </Link>
-            <p className="text-background/70 max-w-md mb-6">
-              Your neighborhood café serving artisan coffee, fresh pastries, and wholesome food since 2014. Come for the coffee, stay for the community.
+            <p className="mb-6 max-w-md text-background/70">
+              Your neighborhood cafe serving artisan coffee, fresh pastries, and wholesome food since 2014.
             </p>
             <div className="flex gap-4">
-              <a 
-                href="#" 
-                className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a 
-                href="#" 
-                className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a 
-                href="#" 
-                className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-5 w-5" />
-              </a>
+              {[Instagram, Facebook, Twitter].map((Icon, index) => (
+                <motion.a
+                  key={index}
+                  href="#"
+                  aria-label="Social link"
+                  whileHover={{ y: -4, scale: 1.08 }}
+                  whileTap={{ scale: 0.94 }}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-background/10 transition-colors hover:bg-background/20"
+                >
+                  <Icon className="h-5 w-5" />
+                </motion.a>
+              ))}
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
+            <h4 className="mb-4 text-lg font-semibold">Quick Links</h4>
             <ul className="space-y-3">
-              <li>
-                <Link href="#menu" className="text-background/70 hover:text-background transition-colors">
-                  Menu
-                </Link>
-              </li>
-              <li>
-                <Link href="#about" className="text-background/70 hover:text-background transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="#contact" className="text-background/70 hover:text-background transition-colors">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-background/70 hover:text-background transition-colors">
-                  Careers
-                </Link>
-              </li>
+              {[
+                ["#menu", "Menu"],
+                ["#about", "About Us"],
+                ["#reviews", "Reviews"],
+                ["#contact", "Contact"],
+              ].map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="text-background/70 transition-colors hover:text-background">
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Hours */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Hours</h4>
+            <h4 className="mb-4 text-lg font-semibold">Hours</h4>
             <ul className="space-y-3 text-background/70">
-              <li className="flex justify-between">
-                <span>Mon - Fri</span>
-                <span>6am - 8pm</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Saturday</span>
-                <span>7am - 9pm</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Sunday</span>
-                <span>7am - 9pm</span>
-              </li>
+              <li className="flex justify-between gap-6"><span>Mon - Fri</span><span>6am - 8pm</span></li>
+              <li className="flex justify-between gap-6"><span>Saturday</span><span>7am - 9pm</span></li>
+              <li className="flex justify-between gap-6"><span>Sunday</span><span>7am - 9pm</span></li>
             </ul>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="border-t border-background/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-background/50 text-sm">
-            © 2026 Demo Café. All rights reserved.
-          </p>
-          <p className="text-background/50 text-sm">
-            Designed & Built by Mrunali
-          </p>
+        <motion.div variants={fadeUp} className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-background/10 pt-8 md:flex-row">
+          <p className="text-sm text-background/50">© 2026 {CAFE_NAME}. All rights reserved.</p>
+          <p className="text-sm text-background/50">Designed & Built by Mrunali</p>
           <div className="flex gap-6 text-sm text-background/50">
-            <Link href="#" className="hover:text-background transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="#" className="hover:text-background transition-colors">
-              Terms of Service
-            </Link>
+            <Link href="#" className="transition-colors hover:text-background">Privacy Policy</Link>
+            <Link href="#" className="transition-colors hover:text-background">Terms of Service</Link>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </footer>
+    </motion.footer>
   )
 }

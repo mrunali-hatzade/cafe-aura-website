@@ -1,44 +1,31 @@
-import type { Metadata } from 'next'
-import { Playfair_Display, Source_Sans_3 } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import './globals.css'
+import type { Metadata } from "next"
+import { Playfair_Display, Source_Sans_3 } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import { Chatbot } from "@/components/chatbot"
+import { AmbientBackground } from "@/components/ambient-background"
+import "./globals.css"
 
-const playfair = Playfair_Display({ 
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: '--font-serif'
-});
+  variable: "--font-playfair",
+})
 
-const sourceSans = Source_Sans_3({ 
+const sourceSans = Source_Sans_3({
   subsets: ["latin"],
-  variable: '--font-sans'
-});
+  variable: "--font-source-sans",
+})
+
+const cafeName = process.env.NEXT_PUBLIC_CAFE_NAME || "Cafe Aura"
 
 export const metadata: Metadata = {
-  title: 'Demo Café | Artisan Coffee & Fresh Bites',
-  description: 'Welcome to Demo Café - your neighborhood spot for artisan coffee, fresh pastries, and wholesome food. Visit us today!',
-  generator: 'v0.app',
-  /*icons: { 
-    icon: [     
-      {  
-        url: '/icon-light-32x32.png', 
-        media: '(prefers-color-scheme: light)',  
-      },
-      { 
-        url: '/icon-dark-32x32.png',     
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },*/
-
+  title: `${cafeName} | Artisan Coffee & Fresh Bites`,
+  description:
+    `Welcome to ${cafeName} - your neighborhood spot for artisan coffee, fresh pastries, and wholesome food. Visit us today!`,
+  generator: "v0.app",
   icons: {
-  icon: '/cafe.png',
-  apple: '/cafe.png',
-},
+    icon: "/cafe.png",
+    apple: "/cafe.png",
+  },
 }
 
 export default function RootLayout({
@@ -49,8 +36,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-background">
       <body className={`${playfair.variable} ${sourceSans.variable} font-sans antialiased`}>
+        <AmbientBackground />
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Chatbot />
+        {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>
   )

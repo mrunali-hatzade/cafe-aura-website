@@ -1,64 +1,100 @@
 "use client"
 
 import Link from "next/link"
+import { motion, useScroll, useTransform } from "framer-motion"
+import { ArrowRight, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
+import { MotionButton } from "@/components/motion-wrapper"
+import { fadeUp, staggerContainer } from "@/lib/motion"
 
 export function Hero() {
+  const { scrollY } = useScroll()
+  const backgroundY = useTransform(scrollY, [0, 700], [0, 150])
+  const cupY = useTransform(scrollY, [0, 700], [0, -90])
+
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center pt-16">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-center bg-no-repeat"
+    <section id="home" className="relative min-h-screen overflow-hidden bg-[#24160f]/45 pt-28">
+      <motion.div
+        className="absolute inset-0 bg-cover bg-center opacity-80"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop')`,
-          backgroundSize: '100% 100%',
+          y: backgroundY,
+          backgroundImage:
+            "linear-gradient(90deg, rgba(24,14,9,0.88), rgba(24,14,9,0.6), rgba(24,14,9,0.25)), url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop')",
         }}
       />
-      
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-        <p className="text-white/80 uppercase tracking-[0.3em] text-sm mb-4">
-          Welcome to
-        </p>
-        <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 text-balance">
-          Demo Café
-        </h1>
-        <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto mb-8 text-pretty">
-          Where every cup tells a story. Artisan coffee, fresh pastries, and a warm atmosphere await you.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="#menu">
-            <Button 
-              size="lg" 
-              className="bg-primary text-primary-foreground hover:bg-primary/90 text-base px-8"
-            >
-              Explore Our Menu
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-          <Link href="#contact">
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-foreground text-base px-8"
-            >
-              Visit Us Today
-            </Button>
-          </Link>
-        </div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(217,151,85,0.25),transparent_34%),radial-gradient(circle_at_82%_28%,rgba(255,255,255,0.16),transparent_28%)]" />
 
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="max-w-3xl text-center lg:text-left"
+        >
+          <motion.p variants={fadeUp} className="mb-4 text-sm font-semibold uppercase tracking-[0.32em] text-white/75">
+            Premium artisan cafe
+          </motion.p>
+          <motion.h1
+            variants={fadeUp}
+            className="font-serif text-5xl font-bold leading-tight text-white text-balance md:text-7xl lg:text-8xl"
+          >
+            Coffee that feels crafted, calm, and unforgettable.
+          </motion.h1>
+          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/82 md:text-xl lg:mx-0">
+            Slow-roasted beans, buttery pastries, warm interiors, and a table ready whenever your day needs a softer landing.
+          </motion.p>
+          <motion.div variants={fadeUp} className="mt-9 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
+            <Link href="#menu">
+              <MotionButton>
+                <Button size="lg" className="rounded-full bg-primary px-8 text-base text-primary-foreground shadow-xl shadow-primary/30 hover:bg-primary/90 cursor-pointer">
+                  Order Now
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </MotionButton>
+            </Link>
+            <Link href="/reservation">
+              <MotionButton>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full border-white/70 bg-white/10 px-8 text-base text-white backdrop-blur-md hover:bg-white hover:text-foreground"
+                >
+                  <CalendarDays className="mr-2 h-4 w-4" />
+                  Reserve Table
+                </Button>
+              </MotionButton>
+            </Link>
+          </motion.div>
+        </motion.div>
 
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center pt-2">
-          <div className="w-1 h-3 bg-white/70 rounded-full" />
-        </div>
+        <motion.div
+          className="relative mx-auto hidden h-[520px] w-full max-w-md lg:block"
+          style={{ y: cupY }}
+          initial={{ opacity: 0, x: 60, scale: 0.95 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
+        >
+          <motion.div
+            className="absolute inset-x-8 top-12 rounded-[2rem] border border-white/20 bg-white/12 p-5 shadow-2xl shadow-black/30 backdrop-blur-xl"
+            animate={{ y: [0, -18, 0] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <img
+              src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=900&auto=format&fit=crop"
+              alt="Premium coffee cup"
+              className="h-[430px] w-full rounded-[1.5rem] object-cover"
+            />
+          </motion.div>
+          <motion.div
+            className="absolute bottom-16 left-0 rounded-2xl border border-white/20 bg-white/15 px-5 py-4 text-white shadow-xl backdrop-blur-xl"
+            animate={{ y: [0, 14, 0] }}
+            transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <p className="text-xs uppercase tracking-[0.22em] text-white/70">Today&apos;s blend</p>
+            <p className="mt-1 font-serif text-2xl font-semibold">Caramel House Roast</p>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   )
 }
-
-
-
