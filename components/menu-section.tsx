@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 import { fadeUp, staggerContainer } from "@/lib/motion"
 import {
   ShoppingBag,
@@ -151,6 +152,10 @@ export function MenuSection() {
       }
       return [...prev, { id: item.id, name: item.name, price: item.price, quantity: 1 }]
     })
+    toast.success(`${item.name} added to your order!`, {
+      description: "Click the floating bag icon at the bottom right to view your order.",
+      duration: 3000,
+    })
   }
 
   const updateQuantity = (id: number, delta: number) => {
@@ -257,7 +262,8 @@ export function MenuSection() {
   }
 
   return (
-    <section id="menu" className="relative overflow-hidden bg-secondary/80 backdrop-blur-md py-24">
+    <>
+      <section id="menu" className="relative overflow-hidden bg-secondary/80 backdrop-blur-md py-24">
       {/* Decorative Blurs */}
       <div className="absolute left-0 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
       <div className="absolute bottom-10 right-0 h-72 w-72 translate-x-1/3 rounded-full bg-accent/15 blur-3xl" />
@@ -378,25 +384,23 @@ export function MenuSection() {
           </AnimatePresence>
         </motion.div>
       </div>
+    </section>
 
-      {/* Floating Cart Bubble (Floats cleanly at bottom-24, just above the chatbot at bottom-6) */}
-      <AnimatePresence>
+    {/* Floating Cart Bubble (Floats cleanly at bottom-24, just above the chatbot at bottom-6) */}
+      <motion.button
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        onClick={() => { setIsCartOpen(true); setCheckoutStep("cart") }}
+        className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-2xl hover:scale-105 transition-all cursor-pointer"
+        title="View Cafe Order"
+      >
+        <ShoppingBag className="h-6 w-6" />
         {getCartCount() > 0 && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            onClick={() => { setIsCartOpen(true); setCheckoutStep("cart") }}
-            className="fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-2xl hover:scale-105 transition-all cursor-pointer"
-            title="View Cafe Order"
-          >
-            <ShoppingBag className="h-6 w-6" />
-            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white animate-pulse">
-              {getCartCount()}
-            </span>
-          </motion.button>
+          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white animate-pulse">
+            {getCartCount()}
+          </span>
         )}
-      </AnimatePresence>
+      </motion.button>
 
       {/* Slide-out Glassmorphic Cart Drawer Panel */}
       <AnimatePresence>
@@ -408,7 +412,7 @@ export function MenuSection() {
               animate={{ opacity: 0.4 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsCartOpen(false)}
-              className="fixed inset-0 bg-black z-40 backdrop-blur-xs"
+              className="fixed inset-0 bg-black z-[90] backdrop-blur-xs"
             />
             {/* Drawer */}
             <motion.div
@@ -416,7 +420,7 @@ export function MenuSection() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 350, damping: 30 }}
-              className="fixed top-0 right-0 h-full w-full max-w-md bg-card/95 border-l border-white/40 shadow-2xl z-50 p-6 flex flex-col justify-between backdrop-blur-xl text-foreground"
+              className="fixed top-0 right-0 h-full w-full max-w-md bg-card/95 border-l border-white/40 shadow-2xl z-[100] p-6 flex flex-col justify-between backdrop-blur-xl text-foreground"
             >
               {/* Header */}
               <div className="flex justify-between items-center border-b border-border/40 pb-4">
@@ -436,33 +440,38 @@ export function MenuSection() {
 
               {/* Step Navigation Tabs */}
               {cart.length > 0 && (
-                <div className="mt-4 flex gap-1.5 border border-border/30 bg-secondary/35 p-1 rounded-full text-xs font-semibold">
+                <div className="mt-4 flex gap-1 border border-primary/20 bg-primary/5 p-1 rounded-full text-xs font-medium backdrop-blur-md">
                   <button
-                    disabled={checkoutStep === "payment" && checkoutStep !== "cart"}
                     onClick={() => setCheckoutStep("cart")}
                     className={cn(
-                      "flex-1 py-1.5 rounded-full transition-all cursor-pointer",
-                      checkoutStep === "cart" ? "bg-background shadow text-primary" : "text-muted-foreground"
+                      "flex-1 py-2 rounded-full transition-all duration-300 cursor-pointer text-center",
+                      checkoutStep === "cart"
+                        ? "bg-primary text-primary-foreground shadow-md font-bold scale-[1.02]"
+                        : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                     )}
                   >
                     1. Cart
                   </button>
                   <button
-                    disabled={!customerName || !phone || !customerEmail}
+                    disabled={checkoutStep === "cart" && (!customerName || !phone || !customerEmail)}
                     onClick={() => setCheckoutStep("details")}
                     className={cn(
-                      "flex-1 py-1.5 rounded-full transition-all cursor-pointer",
-                      checkoutStep === "details" ? "bg-background shadow text-primary" : "text-muted-foreground"
+                      "flex-1 py-2 rounded-full transition-all duration-300 cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed",
+                      checkoutStep === "details"
+                        ? "bg-primary text-primary-foreground shadow-md font-bold scale-[1.02]"
+                        : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                     )}
                   >
                     2. Details
                   </button>
                   <button
-                    disabled={!customerName || !phone || !customerEmail}
+                    disabled={!customerName || !phone || !customerEmail || (deliveryType === "Dine-in" && !address) || (deliveryType === "Delivery" && !address)}
                     onClick={() => setCheckoutStep("payment")}
                     className={cn(
-                      "flex-1 py-1.5 rounded-full transition-all cursor-pointer",
-                      checkoutStep === "payment" ? "bg-background shadow text-primary" : "text-muted-foreground"
+                      "flex-1 py-2 rounded-full transition-all duration-300 cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed",
+                      checkoutStep === "payment"
+                        ? "bg-primary text-primary-foreground shadow-md font-bold scale-[1.02]"
+                        : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                     )}
                   >
                     3. Payment
@@ -481,91 +490,106 @@ export function MenuSection() {
                 ) : checkoutStep === "cart" ? (
                   /* Step 1: Cart Items Summary */
                   <div className="space-y-3">
-                    {cart.map((item) => (
-                      <motion.div
-                        layout
-                        key={item.id}
-                        className="flex items-center justify-between gap-4 p-3 rounded-2xl border border-border/40 bg-secondary/15 hover:bg-secondary/25 transition-colors"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm truncate">{item.name}</h4>
-                          <p className="text-xs text-primary font-bold mt-1">Rs. {item.price}</p>
-                        </div>
-
-                        {/* Quantity controls */}
-                        <div className="flex items-center gap-2 bg-background border border-border/40 px-2 py-1 rounded-full">
-                          <button
-                            onClick={() => updateQuantity(item.id, -1)}
-                            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.id, 1)}
-                            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="h-8 w-8 flex items-center justify-center rounded-full text-destructive/80 hover:bg-destructive/10 cursor-pointer"
+                    {cart.map((item) => {
+                      const menuItem = menuItems.find((m) => m.id === item.id);
+                      return (
+                        <motion.div
+                          layout
+                          key={item.id}
+                          className="flex items-center justify-between gap-4 p-3 rounded-2xl border border-border/40 bg-secondary/15 hover:bg-secondary/25 transition-colors"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </motion.div>
-                    ))}
+                          {/* Thumbnail image */}
+                          {menuItem?.image && (
+                            <div className="h-12 w-12 rounded-xl overflow-hidden shrink-0 border border-border/60">
+                              <img
+                                src={menuItem.image}
+                                alt={item.name}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm truncate">{item.name}</h4>
+                            <p className="text-xs text-primary font-bold mt-1">Rs. {item.price}</p>
+                          </div>
+
+                          {/* Quantity controls */}
+                          <div className="flex items-center gap-2 bg-background border border-border/40 px-2 py-1 rounded-full">
+                            <button
+                              onClick={() => updateQuantity(item.id, -1)}
+                              className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
+                            <button
+                              onClick={() => updateQuantity(item.id, 1)}
+                              className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            className="h-8 w-8 flex items-center justify-center rounded-full text-destructive/80 hover:bg-destructive/10 cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 ) : checkoutStep === "details" ? (
                   /* Step 2: Customer Checkout Details */
                   <form onSubmit={(e) => { e.preventDefault(); setCheckoutStep("payment") }} className="space-y-4">
-                    <h4 className="font-serif text-lg font-bold border-b border-border/20 pb-1">Customer Particulars</h4>
+                    <h4 className="font-serif text-lg font-bold border-b border-border/20 pb-1 text-primary">Customer Particulars</h4>
                     <div>
-                      <label className="text-xs font-semibold mb-1 block">Full Name *</label>
+                      <label className="text-xs font-semibold mb-1.5 block text-foreground/80">Full Name *</label>
                       <Input
                         required
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
                         placeholder="Mrunali Hatzade"
-                        className="rounded-xl"
+                        className="rounded-xl border-border/60 focus-visible:ring-primary focus-visible:border-primary bg-background/50"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold mb-1 block">Email Address *</label>
+                      <label className="text-xs font-semibold mb-1.5 block text-foreground/80">Email Address *</label>
                       <Input
                         required
                         type="email"
                         value={customerEmail}
                         onChange={(e) => setCustomerEmail(e.target.value)}
                         placeholder="mrunalihatzade353@gmail.com"
-                        className="rounded-xl"
+                        className="rounded-xl border-border/60 focus-visible:ring-primary focus-visible:border-primary bg-background/50"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold mb-1 block">WhatsApp Mobile Number *</label>
+                      <label className="text-xs font-semibold mb-1.5 block text-foreground/80">WhatsApp Mobile Number *</label>
                       <Input
                         required
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="07218405826"
-                        className="rounded-xl"
+                        className="rounded-xl border-border/60 focus-visible:ring-primary focus-visible:border-primary bg-background/50"
                       />
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold mb-1 block">Fulfillment Type *</label>
-                      <div className="grid grid-cols-3 gap-2 bg-secondary/30 border border-border/30 p-1 rounded-full text-xs font-semibold">
+                      <label className="text-xs font-semibold mb-1.5 block text-foreground/80">Fulfillment Type *</label>
+                      <div className="grid grid-cols-3 gap-1.5 border border-primary/20 bg-primary/5 p-1 rounded-full text-xs font-semibold">
                         {["Dine-in", "Takeaway", "Delivery"].map((type) => (
                           <button
                             key={type}
                             type="button"
                             onClick={() => { setDeliveryType(type as any); setAddress("") }}
                             className={cn(
-                              "py-1.5 rounded-full transition-all cursor-pointer text-center",
-                              deliveryType === type ? "bg-background shadow text-primary" : "text-muted-foreground"
+                              "py-1.5 rounded-full transition-all duration-300 cursor-pointer text-center",
+                              deliveryType === type
+                                ? "bg-primary text-primary-foreground shadow font-bold"
+                                : "text-muted-foreground hover:text-foreground"
                             )}
                           >
                             {type}
@@ -575,7 +599,7 @@ export function MenuSection() {
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold mb-1 block">
+                      <label className="text-xs font-semibold mb-1.5 block text-foreground/80">
                         {deliveryType === "Dine-in" && "Select Table Number *"}
                         {deliveryType === "Takeaway" && "Requested Pickup Time *"}
                         {deliveryType === "Delivery" && "Delivery Address *"}
@@ -585,13 +609,13 @@ export function MenuSection() {
                           required
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
-                          className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full rounded-xl border border-border/60 bg-background/50 px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground transition-all"
                         >
-                          <option value="">Choose a table...</option>
-                          <option value="Table 1 (Window side)">Table 1 (Window side)</option>
-                          <option value="Table 2 (Cosy nook)">Table 2 (Cosy nook)</option>
-                          <option value="Table 3 (Bar lounge)">Table 3 (Bar lounge)</option>
-                          <option value="Table 4 (Premium terrace)">Table 4 (Premium terrace)</option>
+                          <option value="" className="bg-card">Choose a table...</option>
+                          <option value="Table 1 (Window side)" className="bg-card">Table 1 (Window side)</option>
+                          <option value="Table 2 (Cosy nook)" className="bg-card">Table 2 (Cosy nook)</option>
+                          <option value="Table 3 (Bar lounge)" className="bg-card">Table 3 (Bar lounge)</option>
+                          <option value="Table 4 (Premium terrace)" className="bg-card">Table 4 (Premium terrace)</option>
                         </select>
                       )}
                       {deliveryType === "Takeaway" && (
@@ -600,7 +624,7 @@ export function MenuSection() {
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
                           placeholder="e.g. 5:30 PM (Pickup)"
-                          className="rounded-xl"
+                          className="rounded-xl border-border/60 focus-visible:ring-primary focus-visible:border-primary bg-background/50"
                         />
                       )}
                       {deliveryType === "Delivery" && (
@@ -609,7 +633,7 @@ export function MenuSection() {
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
                           placeholder="Please supply your full delivery address in Pune..."
-                          className="w-full rounded-xl border border-input bg-background/80 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full rounded-xl border border-border/60 bg-background/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary focus:ring-offset-0 transition-all"
                           rows={3}
                         />
                       )}
@@ -619,7 +643,7 @@ export function MenuSection() {
                 ) : (
                   /* Step 3: Interactive Payments Interface */
                   <div className="space-y-4">
-                    <h4 className="font-serif text-lg font-bold border-b border-border/20 pb-1">Payment Method</h4>
+                    <h4 className="font-serif text-lg font-bold border-b border-border/20 pb-1 text-primary">Payment Method</h4>
                     
                     {/* Method selector pills */}
                     <div className="grid grid-cols-3 gap-2 bg-secondary/35 border border-border/30 p-1 rounded-full text-xs font-semibold">
@@ -653,15 +677,24 @@ export function MenuSection() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center space-y-3"
+                            className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center space-y-3 shadow-inner"
                           >
-                            <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">📲 Real UPI QR: Scan with GPay/PhonePe to Pay Rs. {getSubtotal()}</p>
-                            <div className="mx-auto flex h-36 w-36 items-center justify-center rounded-2xl bg-white p-2 border border-emerald-500/30 shadow-md">
+                            <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1">
+                              <span>📲</span> Scan QR code to Pay Rs. {getSubtotal()}
+                            </p>
+                            <div className="mx-auto flex h-36 w-36 items-center justify-center rounded-2xl bg-white p-2 border border-emerald-500/30 shadow-md transition-transform hover:scale-105 duration-300">
                               <img src={qrUrl} alt="UPI QR Code" className="h-full w-full object-contain" />
                             </div>
-                            <p className="text-[9px] text-muted-foreground leading-normal">
-                              Pre-fills Payee Name, Payee UPI ID (<strong>{payeeUpi}</strong>), and exact amount.
-                            </p>
+                            <div className="bg-background/80 rounded-xl p-2 border border-emerald-500/10 text-[10px] space-y-1">
+                              <div className="flex justify-between items-center text-muted-foreground">
+                                <span>UPI Address:</span>
+                                <span className="font-bold text-foreground font-mono">{payeeUpi}</span>
+                              </div>
+                              <div className="flex justify-between items-center text-muted-foreground">
+                                <span>Account Name:</span>
+                                <span className="font-semibold text-foreground">{CAFE_NAME}</span>
+                              </div>
+                            </div>
                             
                             <div className="text-left space-y-1.5 pt-1.5 border-t border-emerald-500/10">
                               <label className="text-[9px] font-bold text-muted-foreground uppercase block">UPI Transaction UTR Number (12 digits) *</label>
@@ -673,7 +706,7 @@ export function MenuSection() {
                                   if (val.length <= 12) setTransactionId(val);
                                 }}
                                 placeholder="Enter 12-digit numeric Ref No"
-                                className="rounded-xl h-9 text-xs bg-background/80"
+                                className="rounded-xl h-9 text-xs bg-background/80 border-emerald-500/20 focus-visible:ring-emerald-500 focus-visible:border-emerald-500"
                               />
                             </div>
                           </motion.div>
@@ -686,27 +719,45 @@ export function MenuSection() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
-                          className="space-y-3"
+                          className="space-y-4"
                         >
                           {/* 3D-styled metallic gradient Credit Card Mockup */}
-                          <div className="relative w-full aspect-[1.586] rounded-2xl bg-gradient-to-br from-[#d99755] to-[#24160f] text-white p-5 shadow-lg overflow-hidden flex flex-col justify-between">
-                            <div className="absolute top-1/2 right-0 w-24 h-24 bg-white/5 rounded-full blur-xl -z-1" />
+                          <div className="relative w-full aspect-[1.586] rounded-2xl bg-gradient-to-br from-[#d99755] via-[#634028] to-[#1a100a] text-white p-5 shadow-2xl overflow-hidden flex flex-col justify-between border border-amber-500/20">
+                            {/* Card Details Glow Overlay */}
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
                             <div className="flex justify-between items-start">
-                              <span className="font-serif text-base tracking-widest font-bold text-amber-200">{CAFE_NAME.toUpperCase()}</span>
-                              <CreditCard className="h-6 w-6 text-amber-100 opacity-90" />
+                              <span className="font-serif text-sm tracking-widest font-bold text-amber-200/90">{CAFE_NAME.toUpperCase()}</span>
+                              <div className="flex flex-col items-end">
+                                <span className="text-[8px] uppercase tracking-widest opacity-60">Gold Access</span>
+                                <span className="text-[10px] font-bold text-amber-300">PREMIUM</span>
+                              </div>
                             </div>
+
+                            {/* Card Chip Visual */}
+                            <div className="w-9 h-7 rounded-md bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 p-1 flex flex-col justify-between border border-amber-300/30 shadow-inner">
+                              <div className="flex justify-between h-[30%]">
+                                <div className="w-[20%] h-full border-r border-amber-900/30" />
+                                <div className="w-[20%] h-full border-l border-amber-900/30" />
+                              </div>
+                              <div className="h-[2px] bg-amber-900/20 w-full" />
+                              <div className="flex justify-between h-[30%]">
+                                <div className="w-[20%] h-full border-r border-amber-900/30" />
+                                <div className="w-[20%] h-full border-l border-amber-900/30" />
+                              </div>
+                            </div>
+
                             <div>
-                              <p className="font-mono text-base tracking-widest sm:text-lg mb-1">
+                              <p className="font-mono text-base tracking-widest sm:text-lg mb-2 text-amber-100 shadow-sm">
                                 {cardNumber || "•••• •••• •••• ••••"}
                               </p>
-                              <div className="flex justify-between items-center text-xs opacity-80">
+                              <div className="flex justify-between items-end text-xs">
                                 <div>
-                                  <p className="text-[8px] uppercase tracking-wider">Cardholder</p>
-                                  <p className="font-semibold tracking-wider truncate max-w-[150px]">{cardHolder.toUpperCase() || "YOUR NAME"}</p>
+                                  <p className="text-[7px] uppercase tracking-wider text-amber-200/60">Cardholder</p>
+                                  <p className="font-semibold tracking-wider truncate max-w-[170px] uppercase text-white">{cardHolder || "Your Name"}</p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-[8px] uppercase tracking-wider">Expires</p>
-                                  <p className="font-mono font-semibold">{cardExpiry || "MM/YY"}</p>
+                                  <p className="text-[7px] uppercase tracking-wider text-amber-200/60">Expires</p>
+                                  <p className="font-mono font-semibold text-white">{cardExpiry || "MM/YY"}</p>
                                 </div>
                               </div>
                             </div>
@@ -714,36 +765,48 @@ export function MenuSection() {
 
                           {/* Inputs */}
                           <div className="space-y-2.5">
-                            <Input
-                              required
-                              placeholder="Cardholder Name"
-                              className="rounded-xl bg-background/50 h-9 text-xs"
-                              value={cardHolder}
-                              onChange={(e) => setCardHolder(e.target.value)}
-                            />
-                            <Input
-                              required
-                              placeholder="Card Number (16-digits)"
-                              className="rounded-xl bg-background/50 h-9 text-xs"
-                              value={cardNumber}
-                              onChange={(e) => handleCardNumberChange(e.target.value)}
-                            />
+                            <div>
+                              <label className="text-[10px] font-semibold text-muted-foreground uppercase block mb-1">Cardholder Name</label>
+                              <Input
+                                required
+                                placeholder="Enter cardholder name"
+                                className="rounded-xl bg-background/50 h-9.5 text-xs focus-visible:ring-primary focus-visible:border-primary"
+                                value={cardHolder}
+                                onChange={(e) => setCardHolder(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-semibold text-muted-foreground uppercase block mb-1">Card Number</label>
+                              <Input
+                                required
+                                placeholder="4111 2222 3333 4444"
+                                className="rounded-xl bg-background/50 h-9.5 text-xs focus-visible:ring-primary focus-visible:border-primary font-mono"
+                                value={cardNumber}
+                                onChange={(e) => handleCardNumberChange(e.target.value)}
+                              />
+                            </div>
                             <div className="grid grid-cols-2 gap-2">
-                              <Input
-                                required
-                                placeholder="Expiry (MM/YY)"
-                                className="rounded-xl bg-background/50 h-9 text-xs"
-                                value={cardExpiry}
-                                onChange={(e) => { if (e.target.value.length <= 5) setCardExpiry(e.target.value) }}
-                              />
-                              <Input
-                                required
-                                type="password"
-                                placeholder="CVV (3 digits)"
-                                className="rounded-xl bg-background/50 h-9 text-xs"
-                                value={cardCvv}
-                                onChange={(e) => { if (e.target.value.length <= 3) setCardCvv(e.target.value) }}
-                              />
+                              <div>
+                                <label className="text-[10px] font-semibold text-muted-foreground uppercase block mb-1">Expiry Date</label>
+                                <Input
+                                  required
+                                  placeholder="MM/YY"
+                                  className="rounded-xl bg-background/50 h-9.5 text-xs focus-visible:ring-primary focus-visible:border-primary font-mono"
+                                  value={cardExpiry}
+                                  onChange={(e) => { if (e.target.value.length <= 5) setCardExpiry(e.target.value) }}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[10px] font-semibold text-muted-foreground uppercase block mb-1">CVV Code</label>
+                                <Input
+                                  required
+                                  type="password"
+                                  placeholder="•••"
+                                  className="rounded-xl bg-background/50 h-9.5 text-xs focus-visible:ring-primary focus-visible:border-primary font-mono"
+                                  value={cardCvv}
+                                  onChange={(e) => { if (e.target.value.length <= 3) setCardCvv(e.target.value) }}
+                                />
+                              </div>
                             </div>
                           </div>
                         </motion.div>
@@ -755,11 +818,13 @@ export function MenuSection() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
-                          className="rounded-2xl border border-amber-500/25 bg-amber-500/5 p-4 text-center space-y-2"
+                          className="rounded-2xl border border-amber-500/25 bg-amber-500/5 p-4 text-center space-y-2.5 shadow-sm"
                         >
-                          <p className="text-xs font-semibold text-amber-600 dark:text-amber-500">💰 Cash on Delivery / Pay at Counter</p>
-                          <p className="text-[10px] text-muted-foreground leading-relaxed">
-                            No immediate transaction required! Simply complete the order now, and pay **Rs. {getSubtotal()}** in cash or card when you receive your order at your table/delivery address.
+                          <p className="text-xs font-semibold text-amber-600 dark:text-amber-500 flex items-center justify-center gap-1.5">
+                            <span>💰</span> Cash on Delivery / Pay at Counter
+                          </p>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            No payment is required right now! Simply complete the order now, and pay <strong className="text-foreground">Rs. {getSubtotal()}</strong> at the counter or to your delivery server.
                           </p>
                         </motion.div>
                       )}
@@ -767,35 +832,40 @@ export function MenuSection() {
 
                     {/* 🛠️ Real Payments Demo Simulator Switch (Shown only for non-COD payment modes) */}
                     {paymentMethod !== "COD" && (
-                      <div className="rounded-2xl border border-dashed border-border/50 bg-secondary/25 p-3.5 mt-4 space-y-2.5">
-                        <span className="text-[9px] font-bold text-primary tracking-wider uppercase block">🛠️ DEMO SIMULATOR CONTROL</span>
-                        <p className="text-[10px] text-muted-foreground leading-normal">
-                          For client demonstration: Choose whether the payment succeeds or fails dynamically to test real confirming receipts!
-                        </p>
-                        <div className="grid grid-cols-2 gap-2 text-[10px] font-bold">
+                      <div className="rounded-2xl border border-dashed border-border/80 bg-secondary/15 p-3.5 mt-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] font-bold text-primary tracking-wider uppercase">🛠️ Demo payment switch</span>
+                          <span className={cn(
+                            "text-[8px] font-bold px-1.5 py-0.5 rounded",
+                            simulationStatus === "success" ? "bg-emerald-500/10 text-emerald-600" : "bg-rose-500/10 text-rose-600"
+                          )}>
+                            {simulationStatus === "success" ? "PASSING" : "FAILING"}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[10px] font-semibold">
                           <button
                             type="button"
                             onClick={() => setSimulationStatus("success")}
                             className={cn(
-                              "py-1.5 rounded-lg border transition-all cursor-pointer text-center",
+                              "py-1 rounded-lg border transition-all cursor-pointer text-center",
                               simulationStatus === "success"
-                                ? "bg-emerald-500/10 border-emerald-500/35 text-emerald-600 shadow-sm font-bold"
+                                ? "bg-emerald-500/10 border-emerald-500/35 text-emerald-600 shadow-xs font-bold"
                                 : "bg-background border-border/40 text-muted-foreground hover:text-foreground"
                             )}
                           >
-                            🟢 Verify (Succeed)
+                            Success
                           </button>
                           <button
                             type="button"
                             onClick={() => setSimulationStatus("failed")}
                             className={cn(
-                              "py-1.5 rounded-lg border transition-all cursor-pointer text-center",
+                              "py-1 rounded-lg border transition-all cursor-pointer text-center",
                               simulationStatus === "failed"
-                                ? "bg-rose-500/10 border-rose-500/35 text-rose-600 shadow-sm font-bold"
+                                ? "bg-rose-500/10 border-rose-500/35 text-rose-600 shadow-xs font-bold"
                                 : "bg-background border-border/40 text-muted-foreground hover:text-foreground"
                             )}
                           >
-                            🔴 Reject (Fail)
+                            Fail
                           </button>
                         </div>
                       </div>
@@ -821,7 +891,7 @@ export function MenuSection() {
                           if (checkoutStep === "payment") setCheckoutStep("details")
                           else if (checkoutStep === "details") setCheckoutStep("cart")
                         }}
-                        className="rounded-full cursor-pointer h-10 text-xs"
+                        className="rounded-full cursor-pointer h-10 text-xs hover:bg-secondary/40 transition-all active:scale-95"
                       >
                         Back
                       </Button>
@@ -829,7 +899,7 @@ export function MenuSection() {
                       <Button
                         variant="outline"
                         onClick={() => setIsCartOpen(false)}
-                        className="rounded-full cursor-pointer h-10 text-xs"
+                        className="rounded-full cursor-pointer h-10 text-xs hover:bg-secondary/40 transition-all active:scale-95"
                       >
                         Keep Browsing
                       </Button>
@@ -839,7 +909,7 @@ export function MenuSection() {
                     {checkoutStep === "cart" && (
                       <Button
                         onClick={() => setCheckoutStep("details")}
-                        className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 text-xs cursor-pointer"
+                        className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 text-xs cursor-pointer active:scale-95 transition-all shadow-md hover:shadow-lg shadow-primary/10"
                       >
                         Checkout Order
                       </Button>
@@ -854,7 +924,7 @@ export function MenuSection() {
                             document.getElementById("details-submit-hidden")?.click()
                           }
                         }}
-                        className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 text-xs cursor-pointer"
+                        className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 text-xs cursor-pointer active:scale-95 transition-all shadow-md hover:shadow-lg shadow-primary/10"
                       >
                         Proceed to Pay
                       </Button>
@@ -867,7 +937,7 @@ export function MenuSection() {
                           paymentMethod === "Card" &&
                           (!cardHolder || cardNumber.length < 19 || !cardExpiry || cardCvv.length < 3)
                         }
-                        className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 text-xs cursor-pointer shadow-lg shadow-primary/20"
+                        className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 text-xs cursor-pointer shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
                       >
                         <Lock className="h-3.5 w-3.5 mr-1" /> Pay & Order
                       </Button>
@@ -884,7 +954,7 @@ export function MenuSection() {
       <AnimatePresence>
         {gatewayStage && (
           <motion.div
-            className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-md"
+            className="fixed inset-0 z-[110] grid place-items-center bg-black/60 p-4 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -902,7 +972,7 @@ export function MenuSection() {
       <AnimatePresence>
         {showOrderInvoice && (
           <motion.div
-            className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[110] grid place-items-center bg-black/50 p-4 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -962,7 +1032,7 @@ export function MenuSection() {
       <AnimatePresence>
         {showFailedModal && (
           <motion.div
-            className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[110] grid place-items-center bg-black/50 p-4 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -993,8 +1063,9 @@ export function MenuSection() {
               </p>
 
               <Button
+                variant="destructive"
                 onClick={() => setShowFailedModal(false)}
-                className="w-full rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer h-10 text-xs font-semibold"
+                className="w-full rounded-full h-10 text-xs font-semibold cursor-pointer"
               >
                 Try Again
               </Button>
@@ -1002,6 +1073,6 @@ export function MenuSection() {
           </motion.div>
         )}
       </AnimatePresence>
-    </section>
+    </>
   )
 }

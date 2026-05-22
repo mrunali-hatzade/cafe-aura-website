@@ -2,7 +2,9 @@ import type { Metadata } from "next"
 import { Playfair_Display, Source_Sans_3 } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Chatbot } from "@/components/chatbot"
+import { ScrollToTop } from "@/components/scroll-to-top"
 import { AmbientBackground } from "@/components/ambient-background"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -39,6 +41,8 @@ export default function RootLayout({
         <AmbientBackground />
         {children}
         <Chatbot />
+        <ScrollToTop />
+        <Toaster />
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

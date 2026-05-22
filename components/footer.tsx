@@ -70,7 +70,17 @@ export function Footer() {
 
         <motion.div variants={fadeUp} className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-background/10 pt-8 md:flex-row">
           <p className="text-sm text-background/50">© 2026 {CAFE_NAME}. All rights reserved.</p>
-          <p className="text-sm text-background/50">Designed & Built by Mrunali</p>
+          <p className="text-sm text-background/50">
+            Designed & Built by{" "}
+            <a
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-background underline underline-offset-4 transition-colors"
+            >
+              Mrunali
+            </a>
+          </p>
           <div className="flex gap-6 text-sm text-background/50">
             <Link href="#" className="transition-colors hover:text-background">Privacy Policy</Link>
             <Link href="#" className="transition-colors hover:text-background">Terms of Service</Link>

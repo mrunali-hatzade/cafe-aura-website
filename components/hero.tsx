@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
+import { useEffect } from "react"
 import { ArrowRight, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MotionButton } from "@/components/motion-wrapper"
@@ -12,12 +13,62 @@ export function Hero() {
   const backgroundY = useTransform(scrollY, [0, 700], [0, 150])
   const cupY = useTransform(scrollY, [0, 700], [0, -90])
 
+  // 3D Parallax Mouse Tracking
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+
+  // Smooth springs for transformations
+  const springConfig = { damping: 28, stiffness: 90 }
+  const x = useSpring(mouseX, springConfig)
+  const y = useSpring(mouseY, springConfig)
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY } = e
+      const { innerWidth, innerHeight } = window
+      // Normalize position to -0.5 to 0.5
+      const xOffset = (clientX / innerWidth) - 0.5
+      const yOffset = (clientY / innerHeight) - 0.5
+      
+      // Shift background up to 35px
+      mouseX.set(xOffset * -35)
+      mouseY.set(yOffset * -35)
+    }
+
+    window.addEventListener("mousemove", handleMouseMove)
+    return () => window.removeEventListener("mousemove", handleMouseMove)
+  }, [mouseX, mouseY])
+
+  // Combine Scroll Parallax and Mouse Parallax for Background
+  const backgroundTranslateX = x
+  const backgroundTranslateY = useTransform(
+    [y, backgroundY],
+    ([latestY, latestScrollY]) => (latestY as number) + (latestScrollY as number)
+  )
+
+  // Subtle 3D tilts for Background
+  const backgroundRotateX = useTransform(y, [-35, 35], [1.5, -1.5])
+  const backgroundRotateY = useTransform(x, [-35, 35], [-1.5, 1.5])
+
+  // Separate mouse shift for foreground Coffee Cup to create separation depth
+  const cupMouseX = useTransform(x, (val) => -val * 0.45)
+  const cupMouseY = useTransform(y, (val) => -val * 0.45)
+  const cupYCombined = useTransform(
+    [cupMouseY, cupY],
+    ([latestMouseY, latestScrollY]) => (latestMouseY as number) + (latestScrollY as number)
+  )
+
   return (
-    <section id="home" className="relative min-h-screen overflow-hidden bg-[#24160f]/45 pt-28">
+    <section id="home" className="relative min-h-screen overflow-hidden bg-[#24160f]/45 pt-28" style={{ perspective: 1200 }}>
       <motion.div
         className="absolute inset-0 bg-cover bg-center opacity-80"
         style={{
-          y: backgroundY,
+          x: backgroundTranslateX,
+          y: backgroundTranslateY,
+          rotateX: backgroundRotateX,
+          rotateY: backgroundRotateY,
+          scale: 1.08,
+          transformStyle: "preserve-3d",
           backgroundImage:
             "linear-gradient(90deg, rgba(24,14,9,0.88), rgba(24,14,9,0.6), rgba(24,14,9,0.25)), url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop')",
         }}
@@ -69,7 +120,7 @@ export function Hero() {
 
         <motion.div
           className="relative mx-auto hidden h-[520px] w-full max-w-md lg:block"
-          style={{ y: cupY }}
+          style={{ x: cupMouseX, y: cupYCombined }}
           initial={{ opacity: 0, x: 60, scale: 0.95 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
