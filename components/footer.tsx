@@ -73,7 +73,7 @@ export function Footer() {
           <p className="text-sm text-background/50">
             Designed & Built by{" "}
             <a
-              href="#"
+              href="https://mrunali-hatzade.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-background underline underline-offset-4 transition-colors"
